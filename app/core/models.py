@@ -1,22 +1,24 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, \
     AbstractBaseUser, PermissionsMixin
-
+from django.contrib.auth.hashers import make_password
 
 # Create your models here.
+
 
 class UserModelmanager(BaseUserManager):
     def create_user(self, email, password=None, **extrat_fields):
         if not email:
             raise ValueError('user must have a email adress')
         email = self.normalize_email(email)
-        user = self.model(email=email, **extrat_fields)
+        user = self.model(email=email)
         user.set_password(password)
-        user.save(self._db)
+        user.save()
         return user
 
     def create_superuser(self, email, password, **extrat_fields):
-        user = self.create_user(email, password)
+        email1 = "user@gmail.com"
+        user = self.create_user(email1, password)
         user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)

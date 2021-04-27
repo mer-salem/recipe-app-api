@@ -8,10 +8,10 @@ class AdminSiteTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.admin_user = get_user_model().objects.create_superuser(
-            email='admin@gamil.com', password='123')
+            email='omar2@gamil.com', password='123')
         self.client.force_login(self.admin_user)
         self.user = get_user_model().objects.create_user(
-            email='user@gmail.com', password='456', name='aucune ide ')
+            email='usert@gmail.com', password='456', name='aucune ide ')
 
     def test_users_listed(self):
         url = reverse('admin:core_user_changelist')

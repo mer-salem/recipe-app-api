@@ -7,6 +7,7 @@ from rest_framework import status
 
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
+ME_URL = reverse("user:me")
 
 
 def create_user(**params):
@@ -75,3 +76,34 @@ class PublicUserTests(TestCase):
             TOKEN_URL, {'email': 'tcom', 'password': ''})
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotIn('token', res.data)
+
+    def test_retrive_unauthorized_user(self):
+        res = self.client.get(ME_URL)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateUserTests(TestCase):
+    def setUp(self):
+        self.user = create_user(email='test@gmail.com',
+                                password='testtest', name='name')
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_success_retrive_profile(self):
+        res = self.client.get(ME_URL)
+        print(self.user.id)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            res.data, {'email': self.user.email, 'name': self.user.name})
+
+    def test_post_method_not_allowed(self):
+        res = self.client.post(ME_URL, {})
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_update_method(self):
+        pyload = {'password': 'test_up', 'name': 'name_up'}
+        res = self.client.patch(ME_URL, pyload)
+        self.user.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.user.name, pyload['name'])
+        self.assertTrue(self.user.check_password(pyload['password']))

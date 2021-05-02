@@ -3,6 +3,8 @@ from django.contrib.auth.models import BaseUserManager, \
     AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.hashers import make_password
 
+from django.conf import settings
+
 # Create your models here.
 
 
@@ -17,8 +19,7 @@ class UserModelmanager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, **extrat_fields):
-        email1 = "user@gmail.com"
-        user = self.create_user(email1, password)
+        user = self.create_user(email, password)
         user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)
@@ -33,3 +34,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserModelmanager()
     USERNAME_FIELD = 'email'
+
+
+class Me(models.Model):
+    email = models.ForeignKey(settings.AUTH_USER_MODEL, models.DO_NOTHING)
+    name = models.CharField(max_length=255)

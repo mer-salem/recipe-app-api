@@ -2,13 +2,14 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import ugettext_lazy as _
 from core.models import User
+from core.models import Me
 
 
 class SerializerUser(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ['email', 'password', 'name']
-        extra_kwargs = {'password': {'write_only': True, 'min_length': 5}
+        extra_kwargs = {'password': {'write_only': True, 'min_length': 5, 'style': {'input_type': 'password'}},
                         }
 
         # def create(self, validate_data):
@@ -23,10 +24,18 @@ class SerializerUser(serializers.ModelSerializer):
         )
         return user
 
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        user = super().update(instance, validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+        return user
+
 
 class AuthTokenSerializer(serializers.Serializer):
     email = serializers.CharField()
-    #name = serializers.CharField()
+    # name = serializers.CharField()
     password = serializers.CharField(
         style={'input_type': 'password'}, trim_whitespace=False)
 

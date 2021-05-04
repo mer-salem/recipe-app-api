@@ -8,7 +8,6 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from rest_framework.authentication import TokenAuthentication
 from django.views.decorators.http import require_http_methods
 # Create your views here.
-from core.models import Me
 
 
 class ViewSerializerUser(generics.CreateAPIView):
@@ -24,7 +23,7 @@ class CreateTokenView(ObtainAuthToken):
 class ViewUpdateUser(generics.RetrieveUpdateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    # queryset = get_user_model().objects.all()
+    queryset = get_user_model().objects.all()
     serializer_class = SerializerUser
     #lookup_field = 'id'
 

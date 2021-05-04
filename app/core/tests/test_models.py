@@ -1,6 +1,11 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 # from django.contrib.auth.base_user import AbstractBaseUser
+from core import models
+
+
+def simple_user(email='test@gmail.com', password='password'):
+    return get_user_model().objects.create_user(email, password)
 
 
 class TestCaseModel(TestCase):
@@ -37,3 +42,7 @@ class TestCaseModel(TestCase):
         email = 'veza@gmail.com'
         user = get_user_model().objects.create_user(email, '123')
         self.assertEqual(user.email, user.get_username())
+
+    def test_add_new_tag(self):
+        tag = models.Tag.objects.create(user=simple_user(), name='fruits')
+        self.assertEqual(str(tag), tag.name)

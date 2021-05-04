@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, \
     AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.hashers import make_password
+from django.conf import Settings
 
 from django.conf import settings
 
@@ -36,6 +37,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
 
 
-class Me(models.Model):
-    email = models.ForeignKey(settings.AUTH_USER_MODEL, models.DO_NOTHING)
+class Tag(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name

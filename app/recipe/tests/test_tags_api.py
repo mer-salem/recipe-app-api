@@ -32,12 +32,11 @@ class PrivateTagsTests(TestCase):
         Tag.objects.create(user=self.user, name='Dessert')
 
         res = self.client.get(TAGS_URL)
-        print(res.data)
+
         tag = Tag.objects.all().order_by('-name')
         serializer = TagSerializer(tag, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
-        print(serializer.data)
 
     def test_tags_limited_to_user(self):
         self.user2 = get_user_model().objects.create_user('test2@gmail.com', 'password2')
@@ -47,3 +46,17 @@ class PrivateTagsTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['name'], tag.name)
+
+    def test_create_successful_tag(self):
+
+        pyload = {'name': 'tag'}
+        res = self.client.post(TAGS_URL, pyload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        exists = Tag.objects.filter(name=pyload['name']).exists()
+        self.assertTrue(exists)
+
+    def test_valide_tag_error(self):
+
+        pyload = {'name': ''}
+        res = self.client.post(TAGS_URL, pyload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

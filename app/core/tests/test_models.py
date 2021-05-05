@@ -43,6 +43,11 @@ class TestCaseModel(TestCase):
         user = get_user_model().objects.create_user(email, '123')
         self.assertEqual(user.email, user.get_username())
 
-    def test_add_new_tag(self):
+    def test_tag_representation(self):
         tag = models.Tag.objects.create(user=simple_user(), name='fruits')
         self.assertEqual(str(tag), tag.name)
+
+    def test_ingrediant_representation(self):
+        ingrediant = models.Ingrediant.objects.create(
+            user=simple_user(), name='Cucumber')
+        self.assertEqual(str(ingrediant), ingrediant.name)

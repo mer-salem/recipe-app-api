@@ -52,7 +52,8 @@ class PrivateIngrediantTest(TestCase):
         pyload = {'name': 'test_ingrediant'}
         res = self.client.post(INGREDIANT_URL, pyload)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        exists = Ingrediant.objects.filter(name=pyload['name']).exists()
+        exists = Ingrediant.objects.filter(
+            user=self.user, name=pyload['name']).exists()
         self.assertTrue(exists)
 
     def test_create_invalid_ingrediant(self):

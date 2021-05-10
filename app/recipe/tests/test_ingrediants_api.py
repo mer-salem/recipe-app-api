@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from core.models import Ingrediant
-from recipe.serializers import TagSerializer, IngrediantSerializer
+from recipe.serializers import IngrediantSerializer
 
 
 INGREDIANT_URL = reverse('recipe:ingrediant-list')
@@ -28,7 +28,7 @@ class PrivateIngrediantTest(TestCase):
 
     def test_retrive_ingrediant(self):
         Ingrediant.objects.create(user=self.user, name='cucumber')
-        Ingrediant.objects.create(user=self.user, name='cucumber2')
+        Ingrediant.objects.create(user=self.user, name='aucumber2')
 
         res = self.client.get(INGREDIANT_URL)
 

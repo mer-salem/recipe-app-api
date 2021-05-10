@@ -49,7 +49,7 @@ class PrivateTagsTests(TestCase):
 
     def test_create_successful_tag(self):
 
-        pyload = {'name': 'tag'}
+        pyload = {'user': self.user, 'name': 'tag'}
         res = self.client.post(TAGS_URL, pyload)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         exists = Tag.objects.filter(name=pyload['name']).exists()

@@ -4,10 +4,22 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from core.models import Recipe, Ingrediant, Tag
-from recipe.serializers import RecipeSerializer
+from recipe.serializers import RecipeSerializer, RecipeDetailSerialzer
 
 
 RECIPE_URL = reverse('recipe:recipe-list')
+
+
+def sample_ingrediant(user, name='name_ingrediant'):
+    return Ingrediant.objects.create(user=user, name=name)
+
+
+def detail_reciep(recipe_id):
+    return reverse('recipe:recipe-detail', args=[recipe_id])
+
+
+def sample_tag(user, name='name_tag'):
+    return Tag.objects.create(user=user, name=name)
 
 
 def simple_recipe(user, **params):
@@ -61,27 +73,37 @@ class PrivateRecipeTest(TestCase):
         self.assertEqual(len(res.data), 1, msg=None)
         self.assertEqual(res.data[0]['title'], recipe1.title)
 
-#     def test_create_successful_recipe(self):
-#         ingrediant = Ingrediant.objects.create(
-#             user=self.user, name='recipe_ingrediant')
-#         tag = Tag.objects.create(user=self.user, name='recipe_tag')
-#         ingrediant1 = Ingrediant.objects.all()
-#         tag1 = Tag.objects.all()
-#         print(ingrediant1, ingrediant)
-#         pyload = {
-#             'title': 'Sample recipe',
-#             'time_minute': 10,
-#             'price': 5,
-#             'ingrediant': [ingrediant1],
-#             'tag': [tag1]
-#         }
-#         res = self.client.post(RECIPE_URL, pyload)
-#         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-#         exists = Recipe.objects.filter(
-#             user=self.user, title=pyload['title']).exists()
-#         self.assertTrue(exists)
+    def test_recipe_detail(self):
+        recipe = simple_recipe(user=self.user)
+        recipe.ingrediant.add(sample_ingrediant(user=self.user))
+        recipe.tag.add(sample_tag(user=self.user))
 
-#     def test_create_invalid_recipe(self):
-#         pyload = {'title': ''}
-#         res = self.client.post(RECIPE_URL, pyload)
-#         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        url = detail_reciep(recipe.id)
+        res = self.client.get(url)
+        serializer = RecipeDetailSerialzer(recipe)
+        self.assertEqual(res.data, serializer.data)
+
+        #     def test_create_successful_recipe(self):
+        #         ingrediant = Ingrediant.objects.create(
+        #             user=self.user, name='recipe_ingrediant')
+        #         tag = Tag.objects.create(user=self.user, name='recipe_tag')
+        #         ingrediant1 = Ingrediant.objects.all()
+        #         tag1 = Tag.objects.all()
+        #         print(ingrediant1, ingrediant)
+        #         pyload = {
+        #             'title': 'Sample recipe',
+        #             'time_minute': 10,
+        #             'price': 5,
+        #             'ingrediant': [ingrediant1],
+        #             'tag': [tag1]
+        #         }
+        #         res = self.client.post(RECIPE_URL, pyload)
+        #         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        #         exists = Recipe.objects.filter(
+        #             user=self.user, title=pyload['title']).exists()
+        #         self.assertTrue(exists)
+
+        #     def test_create_invalid_recipe(self):
+        #         pyload = {'title': ''}
+        #         res = self.client.post(RECIPE_URL, pyload)
+        #         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

@@ -48,7 +48,7 @@ class PrivateRecipeTest(TestCase):
             'recipe@gmail.com', 'password')
         self.client.force_authenticate(self.user)
 
-    def test_retrive_ingrediant(self):
+    def test_retrive_recipe(self):
         simple_recipe(self.user)
         simple_recipe(self.user, title='recipe01')
 
@@ -83,27 +83,49 @@ class PrivateRecipeTest(TestCase):
         serializer = RecipeDetailSerialzer(recipe)
         self.assertEqual(res.data, serializer.data)
 
-        #     def test_create_successful_recipe(self):
-        #         ingrediant = Ingrediant.objects.create(
-        #             user=self.user, name='recipe_ingrediant')
-        #         tag = Tag.objects.create(user=self.user, name='recipe_tag')
-        #         ingrediant1 = Ingrediant.objects.all()
-        #         tag1 = Tag.objects.all()
-        #         print(ingrediant1, ingrediant)
-        #         pyload = {
-        #             'title': 'Sample recipe',
-        #             'time_minute': 10,
-        #             'price': 5,
-        #             'ingrediant': [ingrediant1],
-        #             'tag': [tag1]
-        #         }
-        #         res = self.client.post(RECIPE_URL, pyload)
-        #         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        #         exists = Recipe.objects.filter(
-        #             user=self.user, title=pyload['title']).exists()
-        #         self.assertTrue(exists)
+    def test_recipe_successful_created_not_assigned(self):
+        default = {
+            'title': 'Sample recipe',
+            'time_minute': 10,
+            'price': 5.00
+        }
+        res = self.client.post(RECIPE_URL, default)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data['id'])
+        for key in default.keys():
+            # getattr(x,y)=>x.y ex : recipe.title
+            self.assertEqual(default[key], getattr(recipe, key))
 
-        #     def test_create_invalid_recipe(self):
-        #         pyload = {'title': ''}
-        #         res = self.client.post(RECIPE_URL, pyload)
-        #         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+    def test_create_recipe_with_tag(self):
+        tag1 = sample_tag(user=self.user, name='tag1')
+        tag2 = sample_tag(user=self.user, name='tag12')
+        default = {
+            'title': 'Sample recipe',
+            'time_minute': 10,
+            'price': 5.00,
+            'tag': [tag1.id, tag2.id]
+        }
+        res = self.client.post(RECIPE_URL, default)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        tags = Tag.objects.all()
+        self.assertEqual(tags.count(), 2)
+        self.assertIn(tag1, tags)
+        self.assertIn(tag2, tags)
+
+    def test_create_recipe_with_ingrediant(self):
+        ingrediant1 = sample_ingrediant(user=self.user, name='tag1')
+        ingrediant2 = sample_ingrediant(user=self.user, name='tag12')
+        default = {
+            'title': 'Sample recipe',
+            'time_minute': 10,
+            'price': 5.00,
+            'ingrediant': [ingrediant1.id, ingrediant2.id]
+        }
+        res = self.client.post(RECIPE_URL, default)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        ingrediants = Ingrediant.objects.all()
+        self.assertEqual(ingrediants.count(), 2)
+        self.assertIn(ingrediant1, ingrediants)
+        self.assertIn(ingrediant2, ingrediants)

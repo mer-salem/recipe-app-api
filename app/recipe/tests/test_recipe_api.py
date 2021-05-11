@@ -114,8 +114,8 @@ class PrivateRecipeTest(TestCase):
         self.assertIn(tag2, tags)
 
     def test_create_recipe_with_ingrediant(self):
-        ingrediant1 = sample_ingrediant(user=self.user, name='tag1')
-        ingrediant2 = sample_ingrediant(user=self.user, name='tag12')
+        ingrediant1 = sample_ingrediant(user=self.user, name='ingrediant1')
+        ingrediant2 = sample_ingrediant(user=self.user, name='ingrediant2')
         default = {
             'title': 'Sample recipe',
             'time_minute': 10,
@@ -129,3 +129,40 @@ class PrivateRecipeTest(TestCase):
         self.assertEqual(ingrediants.count(), 2)
         self.assertIn(ingrediant1, ingrediants)
         self.assertIn(ingrediant2, ingrediants)
+
+    def test_updated_partial_recipe(self):
+
+        recipe = simple_recipe(user=self.user)
+        recipe.ingrediant.add(sample_ingrediant(user=self.user))
+        recipe.tag.add(sample_tag(user=self.user))
+        new_tag = sample_tag(user=self.user, name='new tag')
+
+        url = detail_reciep(recipe_id=recipe.id)
+        res = self.client.patch(
+            url, {'title': 'title_update', 'tag': [new_tag.id]})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        recipe.refresh_from_db()
+
+        self.assertEqual(recipe.title, 'title_update')
+        tags = recipe.tag.all()
+        self.assertEqual(len(tags), 1)
+        self.assertIn(new_tag, tags)
+
+    def test_updated_complete_recipe(self):
+        default = {
+            'title': 'Sample recipe',
+            'time_minute': 10,
+            'price': 5.00,
+        }
+
+        recipe = simple_recipe(user=self.user, **default)
+        recipe.tag.add(sample_tag(user=self.user))
+        url = detail_reciep(recipe_id=recipe.id)
+        default.update({'title': 'title_update'})
+        res = self.client.put(url, default)
+        recipe.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        for key in default.keys():
+            self.assertEqual(default[key], getattr(recipe, key))
+        tags = recipe.tag.all()
+        self.assertEqual(len(tags), 0)
